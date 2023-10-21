@@ -41,6 +41,16 @@ int pantFolds[] = {2, 3, 4};
 int foldTime = 100;
 int foldAngle = 150;
 
+const int switchPin = 13;
+const int buzzerPin = 12;
+
+const int maxDistance = 10;
+
+int coveredSensors;
+int switch_state;
+
+bool foldFlag = true;
+
 
 
 
@@ -62,13 +72,17 @@ void setup() {
   servo4.attach(motorPin4);
   servo5.attach(motorPin5);
 
+  pinMode(switchPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.print(runUltrasonic(1));
-  
+  switch_state = digitalRead(switchPin);
+  if (switch_state == HIGH) {
+    coveredSensors = detectSensors();
+
+  } 
   
 }
 
@@ -122,5 +136,45 @@ long runUltrasonic(int n) {
     distance2 = duration2 * 0.034 / 2;
 
     return distance2;
+  }
+}
+
+int detectSensors() {
+  long sensedDistance1 = runUltrasonic(1);
+  long sensedDistance2 = runUltrasonic(2);
+  int ans = 0;
+
+  if (sensedDistance1 <= maxDistance) {
+    ans += 1;
+  }
+  if (sensedDistance2 <= maxDistance) {
+    ans += 2;
+  }
+  return ans;
+}
+
+void rotateMotors(int n) {
+  int l;
+  int currMotor;
+  if (n == 0) {
+    l = sizeof(sleevelessFolds) / sizeof(sleevelessFolds[0]);
+    for (int i = 0; i < l; i++) {
+      currMotor = sleevelessFolds[i];
+      rotate(currMotor, foldAngle, foldTime);
+    }
+  } 
+  else if (n == 1) {
+    l = sizeof(sleevedFolds) / sizeof(sleevedFolds[0]);
+    for (int i = 0; i < l; i++) {
+      currMotor = sleevedFolds[i];
+      rotate(currMotor, foldAngle, foldTime);
+    }
+  }
+  else if (n == 2) {
+    l = sizeof(pantFolds) / sizeof(pantFolds[i]);
+    for (int i = 0; i < l; i++) {
+      currMotor = pantFolds[i];
+      rotate(currMotor, foldAngle, foldTime);
+    }
   }
 }
