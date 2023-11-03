@@ -35,9 +35,9 @@ Servo servo5;
 
 // order of motor rotations
 
-int sleevelessFolds[] = {1, 2, 3};
-int sleevedFolds[] = {3, 4, 5};
-int pantFolds[] = {2, 3, 4};
+int sleevelessFolds[] = {5};
+int sleevedFolds[] = {1, 3, 5};
+int pantFolds[] = {1, 3};
 
 // other variables
 
@@ -97,28 +97,28 @@ void loop() {
 void rotate(int motor, int degrees) {
   if (motor == 1){
     servo1.write(0);
-    servo1.write(degrees);
-    delay(1000);
-    servo1.write(0);
-  }
-  else if (motor == 2){
     servo2.write(0);
+    servo1.write(degrees);
     servo2.write(degrees);
     delay(1000);
+    servo1.write(0);
     servo2.write(0);
   }
   else if (motor == 3){
     servo3.write(0);
-    servo3.write(degrees);
-    delay(1000);
-    servo3.write(0);
-  }
-  else if (motor == 4){
     servo4.write(0);
+    servo3.write(degrees);
     servo4.write(degrees);
     delay(1000);
+    servo3.write(0);
     servo4.write(0);
   }
+  // else if (motor == 4){
+  //   servo4.write(0);
+  //   servo4.write(degrees);
+  //   delay(1000);
+  //   servo4.write(0);
+  // }
   else if (motor == 5){
     servo5.write(0);
     servo5.write(degrees);
