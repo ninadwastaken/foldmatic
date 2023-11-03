@@ -1,28 +1,31 @@
 #include <Servo.h>
 
+
+const int resetPin = 13;
+int resetState;
 // constants for ultrasonics
 // 1 = shirt sensor
 // 2 = pant sensor
 
-const int trigPin1 = 9;
-const int echoPin1 = 10;
+const int trigPin1 = 10;
+const int echoPin1 = 11;
 
 long duration1;
-long distance1;
+int distance1;
 
 const int trigPin2 = 5;
 const int echoPin2 = 6;
 
 long duration2;
-long distance2;
+int distance2;
 
 // constants for motors
 
-const int motorPin1 = 1;
-const int motorPin2 = 2;
-const int motorPin3 = 3;
-const int motorPin4 = 4;
-const int motorPin5 = 7;
+const int motorPin1 = 2;
+const int motorPin2 = 3;
+const int motorPin3 = 4;
+const int motorPin4 = 8;
+const int motorPin5 = 9;
 
 Servo servo1;
 Servo servo2;
@@ -38,11 +41,11 @@ int pantFolds[] = {2, 3, 4};
 
 // other variables
 
-int foldTime = 100;
-int foldAngle = 150;
+int foldTime = 1000;
+int foldAngle = 359;
 
-const int switchPin = 13;
-const int buzzerPin = 12;
+// const int switchPin = 13;
+// const int buzzerPin = 12;
 
 const int maxDistance = 10;
 
@@ -72,45 +75,60 @@ void setup() {
   servo4.attach(motorPin4);
   servo5.attach(motorPin5);
 
-  pinMode(switchPin, INPUT);
-  pinMode(buzzerPin, OUTPUT);
+  // pinMode(switchPin, INPUT);
+  // pinMode(buzzerPin, OUTPUT);
+
+  pinMode(resetPin, INPUT);
 
 }
 
 void loop() {
-  switch_state = digitalRead(switchPin);
-  if (switch_state == HIGH) {
+  resetState = digitalRead(resetPin);
+  if (resetState == HIGH) {
+    foldFlag = true;
+  }
+
+  if (foldFlag == true) {
     coveredSensors = detectSensors();
-
-  } 
-  
-}
-
-void rotate(int motor, int degrees, int time) {
-  int skip = time / degrees;
-
-  for (int pos = 0; pos <= degrees; pos += 1) {
-    if (motor == 1) {
-      servo1.write(pos);
-    }
-    else if (motor == 2) {
-      servo2.write(pos);
-    }
-    else if (motor == 3) {
-      servo3.write(pos);
-    }
-    else if (motor == 4) {
-      servo4.write(pos);
-    }
-    else if (motor == 5) {
-      servo5.write(pos);
-
-    delay(skip);
-    }
+    rotateMotors(coveredSensors);
   }
 }
 
-long runUltrasonic(int n) {
+void rotate(int motor, int degrees) {
+  if (motor == 1){
+    servo1.write(0);
+    servo1.write(degrees);
+    delay(1000);
+    servo1.write(0);
+  }
+  else if (motor == 2){
+    servo2.write(0);
+    servo2.write(degrees);
+    delay(1000);
+    servo2.write(0);
+  }
+  else if (motor == 3){
+    servo3.write(0);
+    servo3.write(degrees);
+    delay(1000);
+    servo3.write(0);
+  }
+  else if (motor == 4){
+    servo4.write(0);
+    servo4.write(degrees);
+    delay(1000);
+    servo4.write(0);
+  }
+  else if (motor == 5){
+    servo5.write(0);
+    servo5.write(degrees);
+    delay(1000);
+    servo5.write(0);
+  }
+
+}
+
+int runUltrasonic(int n) {
   if(n == 1) {
     digitalWrite(trigPin1, LOW);
     delayMicroseconds(2);
@@ -140,17 +158,18 @@ long runUltrasonic(int n) {
 }
 
 int detectSensors() {
-  long sensedDistance1 = runUltrasonic(1);
-  long sensedDistance2 = runUltrasonic(2);
-  int ans = 0;
+  int sensedDistance1 = runUltrasonic(1);
+  int sensedDistance2 = runUltrasonic(2);
+  Serial.println(sensedDistance1);
+  Serial.println(sensedDistance2);
 
   if (sensedDistance1 <= maxDistance) {
-    ans += 1;
+    return 1;
   }
   if (sensedDistance2 <= maxDistance) {
-    ans += 2;
+    return 2;
   }
-  return ans;
+  return 0;
 }
 
 void rotateMotors(int n) {
@@ -160,21 +179,25 @@ void rotateMotors(int n) {
     l = sizeof(sleevelessFolds) / sizeof(sleevelessFolds[0]);
     for (int i = 0; i < l; i++) {
       currMotor = sleevelessFolds[i];
-      rotate(currMotor, foldAngle, foldTime);
+      rotate(currMotor, foldAngle);
+      delay(2000);
     }
   } 
   else if (n == 1) {
     l = sizeof(sleevedFolds) / sizeof(sleevedFolds[0]);
     for (int i = 0; i < l; i++) {
       currMotor = sleevedFolds[i];
-      rotate(currMotor, foldAngle, foldTime);
+      rotate(currMotor, foldAngle);
+      delay(2000);
     }
   }
   else if (n == 2) {
-    l = sizeof(pantFolds) / sizeof(pantFolds[i]);
+    l = sizeof(pantFolds) / sizeof(pantFolds[0]);
     for (int i = 0; i < l; i++) {
       currMotor = pantFolds[i];
-      rotate(currMotor, foldAngle, foldTime);
+      rotate(currMotor, foldAngle);
+      delay(2000);
     }
   }
+  foldFlag = false;
 }
